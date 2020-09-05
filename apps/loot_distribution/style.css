@@ -1,0 +1,61 @@
+.container {
+  flex: 1;
+  justify-content: "center";
+  align-items: "flex-start";
+  margin-left: 1vw;
+  margin-top: 1vh;
+}
+
+.module {
+  border-color: #e0e0e0;
+  border-width: 2px;
+  border-style: solid;
+  border-radius: 20px;
+  width: 20vw;
+  height: 4vh;
+  margin-top: 2vh;
+}
+
+.member {
+  border-color: #e0e0e0;
+  border-width: 2px;
+  border-style: solid;
+  border-radius: 20px;
+  width: 14vw;
+  height: 4vh;
+  margin-top: 2vh;
+}
+
+.newmodule {
+  margin-top: 2vh;
+  border-radius: 0;
+  background-color: #ffffff;
+}
+
+.newmember {
+  margin-top: 2vh;
+  border-radius: 0;
+  background-color: #ffffff;
+}
+
+.numeric {
+  border-color: #e0e0e0;
+  border-style: solid;
+  border-width: 2px;
+  border-radius: 20px;
+  width: 7vw;
+  height: 4vh;
+}
+
+.submit {
+  flex-direction: row;
+  margin-top: 10vh;
+}
+
+.submitButton {
+  background-color: #ffffff;
+  height: 5vh;
+  width: 15vw;
+  border-color: "blue";
+  border-radius: "50%";
+}
