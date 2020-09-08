@@ -17,6 +17,13 @@ function deleteModule(hash) {
   delete module_ids[hash];
 }
 
+const add_commas = (num) => {
+  let str = String(num);
+  for (let i = str.length - 3; i > 0; i -= 3) {
+    str = str.substring(0, i) + "," + str.substring(i);
+  }
+  return str;
+};
 function deleteMember(hash) {
   number_of_members -= 1;
   for (key in member_ids[hash]) {
@@ -112,6 +119,7 @@ function give_to(member, module_name, cost) {
 
 function calculate_distribution() {
   let loot = [];
+  let total_value = 0;
   let modules = [];
   for (hash in module_ids) {
     const module_id = module_ids[hash];
@@ -159,9 +167,18 @@ function calculate_distribution() {
   let organized_loot = {};
   for (let i = 0; i < loot.length; i++) {
     const name = loot[i].name;
-    organized_loot[name] = loot[i];
+    organized_loot[name] = JSON.parse(JSON.stringify(loot[i]));
     delete organized_loot[name].name;
   }
+
+  for (member in organized_loot) {
+    total_value += organized_loot[member].loot_value;
+    organized_loot[member].loot_value = add_commas(
+      organized_loot[member].loot_value
+    );
+  }
+
+  organized_loot.total_value = add_commas(total_value);
   const result = document.getElementById("result");
   result.innerHTML = JSON.stringify(organized_loot, null, 4);
 }
