@@ -4,6 +4,16 @@ let hash = 0;
 let module_ids = {};
 let member_ids = {};
 
+function add_commas(x) {
+  var num = x;
+  if (typeof x == "number") {
+    num = String(x);
+  }
+  var parts = num.toString().split(".");
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return parts.join(".");
+}
+
 function random(items) {
   return items[Math.floor(Math.random() * items.length)];
 }
@@ -17,13 +27,6 @@ function deleteModule(hash) {
   delete module_ids[hash];
 }
 
-const add_commas = (num) => {
-  let str = String(num);
-  for (let i = str.length - 3; i > 0; i -= 3) {
-    str = str.substring(0, i) + "," + str.substring(i);
-  }
-  return str;
-};
 function deleteMember(hash) {
   number_of_members -= 1;
   for (key in member_ids[hash]) {
@@ -123,7 +126,6 @@ function calculate_distribution() {
   let modules = [];
   for (hash in module_ids) {
     const module_id = module_ids[hash];
-    console.log("README", hash, module_ids, module_id);
     const module_name = document.getElementById(module_id.module).value;
     const quantity = parseInt(
       document.getElementById(module_id.quantity).value
@@ -134,17 +136,21 @@ function calculate_distribution() {
 
     modules.push({ module_name, quantity, cost });
   }
+
   modules.sort((module1, module2) => (module1.cost > module2.cost ? -1 : 1));
   // Generate loot
   for (hash in member_ids) {
     const member_id = member_ids[hash];
     const member_name = document.getElementById(member_id.member).value;
-    loot.push({ name: member_name, loot_value: 0 });
+    if (member_name != "") {
+      loot.push({ name: member_name, loot_value: 0 });
+    }
   }
 
   for (let i = 0; i < modules.length; i++) {
     const { module_name, cost, quantity } = modules[i];
     for (let k = 0; k < quantity; k++) {
+      // Resort loot
       loot.sort((member1, member2) =>
         member1.loot_value > member2.loot_value ? 1 : -1
       );
