@@ -1,3 +1,4 @@
+let api_base_uri = 'https://api.eve-echoes-market.com';
 let number_of_modules = 0;
 let number_of_members = 0;
 let hash = 0;
@@ -86,6 +87,13 @@ function addModule() {
     placeholder: 'e.g. Corpum C-Type Medium Laser',
     allowClear: true
   });
+  $('#' + ids.module).on('select2:select', function(e) {
+    let item_id = e.params.data.id;
+    $.getJSON(api_base_uri + '/market-stats/' + item_id, function(data) {
+      let cost = data[data.length - 1].sell
+      $('#' + ids.cost).val(cost)
+    })
+  })
   number_of_modules += 1;
 }
 
