@@ -293,36 +293,23 @@ function displayList(organized_loot) {
    */
   let output = "";
 
-  output += "<p><strong>Distribution</strong></p>";
+  output += 'Distribution' + "\n";
 
-  output += "<ul>";
+  output += "\n";
+
   for (member in organized_loot) {
     if (member == "total_value") {
       continue;
     }
 
-    output +=
-      "<li>" +
-      member +
-      " - <em>" +
-      organized_loot[member].loot_value +
-      " ISK</em>";
-    output += "<ul>";
+    output += '- **' + member + '** - _' + organized_loot[member].loot_value + ' ISK_' + "\n";
     for (loot in organized_loot[member]) {
-      if (loot == "loot_value") {
-        continue;
-      }
-      output += "<li>" + loot + " x" + organized_loot[member][loot];
-      output += "</li>";
+      if (loot == 'loot_value') { continue; }
+      output += '  - ' + loot + ' x' + organized_loot[member][loot] + "\n";
     }
-    output += "</ul>";
-    output += "</li>";
+    output += "\n";
   }
-  output += "</ul>";
-  output +=
-    "<p><strong>Total Value: " +
-    organized_loot.total_value +
-    " ISK</strong></p>";
+  output += '**Total Value: ' + organized_loot.total_value + ' ISK**';
 
   return output;
 }
