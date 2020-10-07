@@ -203,5 +203,31 @@ function calculate_distribution() {
 
   organized_loot.total_value = add_commas(total_value);
   const result = document.getElementById("result");
-  result.innerHTML = JSON.stringify(organized_loot, null, 4);
+  //result.innerHTML = JSON.stringify(organized_loot, null, 4);
+  result.innerHTML = displayList(organized_loot);
+}
+
+function displayList(organized_loot) {
+  let output = '';
+
+  output += '<p><strong>Distribution</strong></p>';
+
+  output += '<ul>';
+  for (member in organized_loot) {
+    if (member == 'total_value') { continue; }
+
+    output += '<li>' + member + ' - <em>' + organized_loot[member].loot_value + ' ISK</em>';
+    output += '<ul>';
+    for (loot in organized_loot[member]) {
+      if (loot == 'loot_value') { continue; }
+      output += '<li>' + loot + ' x' + organized_loot[member][loot];
+      output += '</li>';
+    }
+    output += '</ul>';
+    output += '</li>';
+  }
+  output += '</ul>';
+  output += '<p><strong>Total Value: ' + organized_loot.total_value + ' ISK</strong></p>';
+
+  return output;
 }
