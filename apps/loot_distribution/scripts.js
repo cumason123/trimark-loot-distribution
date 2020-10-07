@@ -29,6 +29,10 @@ function add_commas(x) {
    * @param x number representing the value we want to append commas to
    * @return string. e.g. given number 1000000 this will return 1,000,000 as a string
    */
+  if (x === undefined || x === null) {
+    // Found empty x
+    return ''
+  }
   var num = x;
   if (typeof x == "number") {
     num = String(x);
@@ -130,7 +134,9 @@ function addModule() {
     $("#" + ids.quantity).val(1);
     let item_id = e.params.data.id;
     $.getJSON(api_base_uri + "/market-stats/" + item_id, function (data) {
-      let cost = data[data.length - 1].sell;
+
+      let cost = "sell" in data ? data[data.length - 1].sell : data[data.length - 1].highest_buy;
+
       $("#" + ids.cost).val(add_commas(cost));
     });
   });
