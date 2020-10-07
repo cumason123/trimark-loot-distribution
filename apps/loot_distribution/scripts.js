@@ -22,6 +22,9 @@ function deleteModule(hash) {
   number_of_modules -= 1;
   for (key in module_ids[hash]) {
     const node = document.getElementById(module_ids[hash][key]);
+    if (key == 'module') {
+      $('#' + module_ids[hash].module).select2('destroy')
+    }
     node.remove();
   }
   delete module_ids[hash];
@@ -51,12 +54,11 @@ function addModule() {
 
   child.innerHTML = `
         <div>
-            <input
-            placeholder="e.g. Corpum C-Type Medium Laser"
+            <select
             id="${ids.module}"
-            class="module"
-            type="text"
-            />
+            class="module">
+              <option></option>
+            </select>
 
             <input 
             id="${ids.quantity}"
@@ -79,6 +81,11 @@ function addModule() {
         </div>
     `;
   itemsContainer.appendChild(child);
+  $('#' + ids.module).select2({
+    data: echoes_items,
+    placeholder: 'e.g. Corpum C-Type Medium Laser',
+    allowClear: true
+  });
   number_of_modules += 1;
 }
 
