@@ -88,6 +88,7 @@ function addModule() {
     allowClear: true
   });
   $('#' + ids.module).on('select2:select', function(e) {
+    $('#' + ids.quantity).val(1)
     let item_id = e.params.data.id;
     $.getJSON(api_base_uri + '/market-stats/' + item_id, function(data) {
       let cost = data[data.length - 1].sell
@@ -141,7 +142,8 @@ function calculate_distribution() {
   let modules = [];
   for (hash in module_ids) {
     const module_id = module_ids[hash];
-    const module_name = document.getElementById(module_id.module).value;
+    let module_selection = $('#' + module_id.module).select2('data')
+    const module_name = module_selection[0].text
     const quantity = parseInt(
       document.getElementById(module_id.quantity).value
     );
