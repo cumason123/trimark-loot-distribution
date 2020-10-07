@@ -63,5 +63,9 @@
   width: 15vw;
   border-color: "blue";
   border-radius: "50%";
-  margin-left: 5vw
+  margin-left: 5vw;
+}
+
+li {
+  margin: 8px 0 8px 0;
 }
