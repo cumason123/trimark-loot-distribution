@@ -66,6 +66,10 @@
   margin-left: 5vw;
 }
 
+footer {
+  clear: both;
+}
+
 li {
   margin: 8px 0 8px 0;
 }

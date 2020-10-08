@@ -12,7 +12,7 @@ let current_session = {
   distribution: []
 };
 
-function copy() {
+function download_loot() {
   /**
    * Copies capture div and saves image as loot.png
    */
@@ -321,7 +321,7 @@ function displayList() {
 
   $('#capture').after('<button id="download_button">Download</button>');
   $('#download_button').on('click', () => {
-    copy();
+    download_loot();
   });
 
   return output;
