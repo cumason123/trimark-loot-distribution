@@ -164,10 +164,18 @@ function addModule(module_data = false) {
     $("#module_quantity_" + module_id).val(current_session.modules[module_id].quantity);
 
     let item_id = e.params.data.id;
-    $.getJSON(api_base_uri + "/market-stats/" + item_id, function (data) {
+    let fetchMarketData = $.getJSON(api_base_uri + "/market-stats/" + item_id, function (data) {
 
       let cost = "sell" in data ? data[data.length - 1].sell : data[data.length - 1].highest_buy;
 
+      $("#module_cost_" + module_id).val(add_commas(cost));
+      current_session.modules[module_id].cost = cost;
+
+      saveToStore('current_session', current_session);
+    });
+
+    fetchMarketData.fail(() => {
+      let cost = 0;
       $("#module_cost_" + module_id).val(add_commas(cost));
       current_session.modules[module_id].cost = cost;
 
