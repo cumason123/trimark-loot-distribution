@@ -5,12 +5,17 @@ let hash = 0;
 let module_ids = {};
 let member_ids = {};
 
-let current_session = {
+let new_session = {
   total_value: 0,
   members: [],
   modules: [],
   distribution: []
 };
+
+let current_session = {...new_session};
+
+let last_session = loadFromStore('current_session');
+console.log(last_session);
 
 function download_loot() {
   /**
@@ -78,17 +83,21 @@ function deleteMember(hash) {
   delete current_session.members[hash];
 }
 
-function addModule() {
+function addModule(module_data = false) {
   /**
    * Adds an empty module row to website
    */
   const hash = current_session.modules.length;
 
-  current_session.modules[hash] = {
-    item_id: 0,
-    name: '',
-    quantity: 0,
-    cost: 0
+  if (!module_data) {
+    current_session.modules[hash] = {
+      item_id: 0,
+      name: '',
+      quantity: 0,
+      cost: 0
+    }
+  } else {
+    current_session.modules[hash] = module_data;
   }
 
   const itemsContainer = document.getElementById("modules");
@@ -108,6 +117,7 @@ function addModule() {
             placeholder="quantity" 
             class="numeric" 
             type="number" 
+            value="${current_session.modules[hash].quantity}" 
             />
 
             <input
@@ -115,6 +125,7 @@ function addModule() {
             placeholder="cost" 
             class="numeric" 
             type="text" 
+            value="${add_commas(current_session.modules[hash].cost)}" 
             />
 
             <button
@@ -124,11 +135,15 @@ function addModule() {
         </div>
     `;
   itemsContainer.appendChild(child);
+
   $("#module_name_" + hash).select2({
     data: echoes_items,
     placeholder: "e.g. Corpum C-Type Medium Laser",
     allowClear: true,
+    tags: true
   });
+  $("#module_name_" + hash).val(current_session.modules[hash].item_id);
+  $("#module_name_" + hash).trigger('change');
 
   $("#module_name_" + hash).on("select2:select", function (e) {
     let this_id = $(this).attr('id').split('_');
@@ -149,6 +164,8 @@ function addModule() {
 
       $("#module_cost_" + module_id).val(add_commas(cost));
       current_session.modules[module_id].cost = cost;
+
+      saveToStore('current_session', current_session);
     });
   });
 
@@ -157,6 +174,8 @@ function addModule() {
     let module_id = this_id[this_id.length - 1];
 
     current_session.modules[module_id].quantity = parseInt($(this).val());
+
+    saveToStore('current_session', current_session);
   });
 
   $('#module_cost_' + hash).on('change', function (e) {
@@ -164,17 +183,23 @@ function addModule() {
     let module_id = this_id[this_id.length - 1];
 
     current_session.modules[module_id].cost = parseInt($(this).val().replace(/,/g,''));
+
+    saveToStore('current_session', current_session);
   });
 }
 
-function addMember() {
+function addMember(member_data = false) {
   /**
    * Adds an empty member row to website
    */
   const hash = current_session.members.length;
 
-  current_session.members[hash] = {
-    name: ''
+  if (!member_data) {
+    current_session.members[hash] = {
+      name: ''
+    }
+  } else {
+    current_session.members[hash] = member_data;
   }
 
   const membersContainer = document.getElementById("members");
@@ -188,6 +213,7 @@ function addMember() {
       placeholder="e.g. DONTSHOOT"
       class="member"
       type="text"
+      value="${current_session.members[hash].name}" 
       />
 
       <button
@@ -203,6 +229,8 @@ function addMember() {
     let member_id = this_id[this_id.length - 1];
 
     current_session.members[member_id].name = $(this).val();
+
+    saveToStore('current_session', current_session);
   });
 }
 
@@ -298,6 +326,8 @@ function calculate_distribution() {
 
   const result = document.getElementById("result");
   result.innerHTML = displayList();
+
+  saveToStore('current_session', current_session);
 }
 
 function displayList() {
@@ -333,3 +363,53 @@ $(document).ready(() => {
     $('#debug-output').html('<pre>' + JSON.stringify(current_session, null, 4) + '</pre>');
   }, 2000)
 });
+
+function saveToStore(key, val) {
+  localStorage.setItem(key, JSON.stringify(val));
+}
+
+function loadFromStore(key) {
+  let stored_data = localStorage.getItem(key);
+  if (stored_data != null && typeof stored_data != 'undefined') {
+    return JSON.parse(stored_data);
+  } else {
+    return false;
+  }
+}
+
+function loadSession() {
+  if(confirm('This will replace any changes you\'ve made during this session. Would you like to continue loading your previous session?')) {
+    if (!last_session) {
+      return false;
+    }
+
+    $('#modules').html('');
+    $('#members').html('');
+    $('#result').html('');
+
+    for (loot_module in last_session.modules) {
+      if (last_session.modules[loot_module] != null) {
+        addModule(last_session.modules[loot_module]);
+      }
+    }
+
+    for (loot_member in last_session.members) {
+      if (last_session.members[loot_member] != null) {
+        addMember(last_session.members[loot_member]);
+      }
+    }
+  }
+}
+
+function clearSession() {
+  if(confirm('This will destroy any changes you\'ve made during this session. Would you like to continue clearing this session?')) {
+    current_session.total_value = 0;
+    current_session.members = [];
+    current_session.modules = [];
+    current_session.distribution = [];
+
+    $('#modules').html('');
+    $('#members').html('');
+    $('#result').html('');
+  }
+}
