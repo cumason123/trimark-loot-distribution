@@ -296,22 +296,6 @@ function calculate_distribution() {
     }
   }
 
-  // Render loot
-  // let organized_loot = {};
-  // for (let i = 0; i < loot.length; i++) {
-  //   const name = loot[i].name;
-  //   organized_loot[name] = JSON.parse(JSON.stringify(loot[i]));
-  //   delete organized_loot[name].name;
-  // }
-
-  // for (member in organized_loot) {
-  //   current_session.total_value += organized_loot[member].loot_value;
-  //   organized_loot[member].loot_value = add_commas(
-  //     organized_loot[member].loot_value
-  //   );
-  // }
-
-  // organized_loot.total_value = add_commas(current_session.total_value);
   const result = document.getElementById("result");
   result.innerHTML = displayList();
 }
@@ -335,6 +319,11 @@ function displayList() {
   }
   output += '**Total Value: ' + add_commas(current_session.total_value) + ' ISK**';
 
+  $('#capture').after('<button id="download_button">Download</button>');
+  $('#download_button').on('click', () => {
+    copy();
+  });
+
   return output;
 }
 
@@ -343,4 +332,4 @@ $(document).ready(() => {
   let debugTimer = setInterval(() => {
     $('#debug-output').html('<pre>' + JSON.stringify(current_session, null, 4) + '</pre>');
   }, 2000)
-})
+});
