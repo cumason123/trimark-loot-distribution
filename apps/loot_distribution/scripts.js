@@ -216,6 +216,9 @@ function calculate_distribution(sort = sort_by.ISK) {
   let total_value = 0;
   let modules = [];
 
+  // Extract config options from form
+  if ($("#sortByName").prop("checked")) { sort = sort_by.USERNAME; }
+
   // Extract module data from HTML
   // TODO: refactor this loop
   for (hash in module_ids) {
@@ -280,11 +283,12 @@ function calculate_distribution(sort = sort_by.ISK) {
   }
 
   // Render loot
+  // Loot is sorted by isk descending by default
   if (sort == sort_by.USERNAME){
-    loot.sort((module1, module2) => (module1.name.localeCompare(module2.name)));
+    loot.sort((member1, member2) => (member1.name.localeCompare(member2.name)));
   }
-  let organized_loot = {};
 
+  let organized_loot = {};
 
   for (let i = 0; i < loot.length; i++) {
     const name = loot[i].name;
