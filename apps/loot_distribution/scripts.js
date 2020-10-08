@@ -17,6 +17,11 @@ let current_session = {...new_session};
 let last_session = loadFromStore('current_session');
 console.log(last_session);
 
+let user_list = loadFromStore('user_list');
+if (!user_list) {
+  user_list = [];
+}
+
 function download_loot() {
   /**
    * Copies capture div and saves image as loot.png
@@ -228,7 +233,23 @@ function addMember(member_data = false) {
     let this_id = $(this).attr('id').split('_');
     let member_id = this_id[this_id.length - 1];
 
-    current_session.members[member_id].name = $(this).val();
+    let member_name = $(this).val();
+    current_session.members[member_id].name = member_name;
+
+    console.log('Checking if user ' + member_name + ' exists...');
+    let user_exists = false;
+    for (user in user_list) {
+      if (user_list[user].text == member_name) {
+        user_exists = true;
+      }
+    }
+    if (!user_exists && member_name != '') {
+      user_list.push({
+        id: user_list.length,
+        text: member_name
+      });
+      saveToStore('user_list', user_list);
+    }
 
     saveToStore('current_session', current_session);
   });
