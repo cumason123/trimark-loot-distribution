@@ -42,8 +42,9 @@
       </div>
 
       <div id="capture">
-        <pre><code id="result"></code></pre>
+        <textarea id="result" onclick="this.select()" readonly></textarea>
       </div>
+      <button id="download_button" onclick="download_loot()">Download</button>
     </div>
     <div id="debug-output" style="width: 32%; float: right;"></div>
   </body>

@@ -376,19 +376,14 @@ function displayList() {
   }
   output += '**Total Value: ' + add_commas(current_session.total_value) + ' ISK**';
 
-  $('#capture').after('<button id="download_button">Download</button>');
-  $('#download_button').on('click', () => {
-    download_loot();
-  });
-
   return output;
 }
 
 // DEBUGGING
 $(document).ready(() => {
-  let debugTimer = setInterval(() => {
-    $('#debug-output').html('<pre>' + JSON.stringify(current_session, null, 4) + '</pre>');
-  }, 2000)
+  //let debugTimer = setInterval(() => {
+  //  $('#debug-output').html('<pre>' + JSON.stringify(current_session, null, 4) + '</pre>');
+  //}, 2000)
 });
 
 function saveToStore(key, val) {
