@@ -5,6 +5,12 @@ let hash = 0;
 let module_ids = {};
 let member_ids = {};
 
+let current_session = {
+  members: [],
+  modules: [],
+  distribution: []
+};
+
 function copy() {
   /**
    * Copies capture div and saves image as loot.png
@@ -53,15 +59,10 @@ function deleteModule(hash) {
    * @param hash string representing the key within module_ids which points
    *     to this module
    */
-  number_of_modules -= 1;
-  for (key in module_ids[hash]) {
-    const node = document.getElementById(module_ids[hash][key]);
-    if (key == "module") {
-      $("#" + module_ids[hash].module).select2("destroy");
-    }
-    node.remove();
-  }
-  delete module_ids[hash];
+  $("#module_name_" + hash).select2("destroy");
+  const node = document.getElementById('module_' + hash);
+  node.remove()
+  delete current_session.modules[hash];
 }
 
 function deleteMember(hash) {
@@ -83,64 +84,89 @@ function addModule() {
   /**
    * Adds an empty module row to website
    */
-  hash = parseInt(hash) + 1;
+  const hash = current_session.modules.length;
+
+  current_session.modules[hash] = {
+    item_id: 0,
+    name: '',
+    quantity: 0,
+    cost: 0
+  }
 
   const itemsContainer = document.getElementById("modules");
   const child = document.createElement("div");
-  const ids = {
-    quantity: `quantity_${hash}`,
-    cost: `cost_${hash}`,
-    module: `module_${hash}`,
-    deleteButton: `delete_module_${hash}`,
-  };
-  module_ids[hash] = ids;
+  child.setAttribute('id', 'module_' + hash);
 
   child.innerHTML = `
         <div>
             <select
-            id="${ids.module}"
+            id="module_name_${hash}"
             class="module">
               <option></option>
             </select>
 
             <input 
-            id="${ids.quantity}"
+            id="module_quantity_${hash}"
             placeholder="quantity" 
             class="numeric" 
             type="number" 
             />
 
             <input
-            id="${ids.cost}"
+            id="module_cost_${hash}"
             placeholder="cost" 
             class="numeric" 
             type="text" 
             />
 
             <button
-            id="${ids.deleteButton}"
+            id="module_delete_${hash}"
             class="deleteButton"
             onclick="deleteModule(${hash})">delete</button>
         </div>
     `;
   itemsContainer.appendChild(child);
-  $("#" + ids.module).select2({
+  $("#module_name_" + hash).select2({
     data: echoes_items,
     placeholder: "e.g. Corpum C-Type Medium Laser",
     allowClear: true,
   });
 
-  $("#" + ids.module).on("select2:select", function (e) {
-    $("#" + ids.quantity).val(1);
+  $("#module_name_" + hash).on("select2:select", function (e) {
+    let this_id = $(this).attr('id').split('_');
+    let module_id = this_id[this_id.length - 1];
+
+    current_session.modules[module_id].item_id = parseInt(e.params.data.id);
+    current_session.modules[module_id].name = e.params.data.text;
+
+    if (current_session.modules[module_id].quantity == 0) {
+      current_session.modules[module_id].quantity = 1;
+    }
+    $("#module_quantity_" + module_id).val(current_session.modules[module_id].quantity);
+
     let item_id = e.params.data.id;
     $.getJSON(api_base_uri + "/market-stats/" + item_id, function (data) {
 
       let cost = "sell" in data ? data[data.length - 1].sell : data[data.length - 1].highest_buy;
 
-      $("#" + ids.cost).val(add_commas(cost));
+      $("#module_cost_" + module_id).val(add_commas(cost));
+      current_session.modules[module_id].cost = cost;
     });
   });
-  number_of_modules += 1;
+
+  $('#module_quantity_' + hash).on('change', function (e) {
+    let this_id = $(this).attr('id').split('_');
+    let module_id = this_id[this_id.length - 1];
+
+    current_session.modules[module_id].quantity = parseInt($(this).val());
+  })
+
+  $('#module_cost_' + hash).on('change', function (e) {
+    let this_id = $(this).attr('id').split('_');
+    let module_id = this_id[this_id.length - 1];
+
+    current_session.modules[module_id].cost = parseInt($(this).val().replace(/,/g,''));
+  })
 }
 
 function addMember() {
@@ -156,6 +182,7 @@ function addMember() {
     deleteButton: `delete_member_${hash}`,
   };
   member_ids[hash] = ids;
+  current_session.members[hash] = ids;
   child.innerHTML = `
     <div>
       <input
@@ -209,25 +236,7 @@ function calculate_distribution() {
 
   let loot = [];
   let total_value = 0;
-  let modules = [];
-
-  for (hash in module_ids) {
-    // Find module
-    const module_id = module_ids[hash];
-    let module_selection = $("#" + module_id.module).select2("data");
-
-    // Get module data
-    const module_name = module_selection[0].text;
-    const quantity = parseInt(
-      document.getElementById(module_id.quantity).value
-    );
-    const cost = parseFloat(
-      document.getElementById(module_id.cost).value.replaceAll(",", "")
-    );
-
-    // add module to array
-    modules.push({ module_name, quantity, cost });
-  }
+  let modules = current_session.modules;
 
   // Step 1: sort modules
   modules.sort((module1, module2) => (module1.cost > module2.cost ? -1 : 1));
@@ -242,7 +251,7 @@ function calculate_distribution() {
       loot.push({ name: member_name, loot_value: 0 });
     }
   }
-
+console.log(modules)
   // Iterate through modules
   for (let i = 0; i < modules.length; i++) {
     const { module_name, cost, quantity } = modules[i];
@@ -290,7 +299,6 @@ function calculate_distribution() {
   organized_loot.total_value = add_commas(total_value);
   const result = document.getElementById("result");
   result.innerHTML = displayList(organized_loot);
-  copy();
 }
 
 function displayList(organized_loot) {
@@ -311,7 +319,7 @@ function displayList(organized_loot) {
     output += '- **' + member + '** - _' + organized_loot[member].loot_value + ' ISK_' + "\n";
     for (loot in organized_loot[member]) {
       if (loot == 'loot_value') { continue; }
-      output += '  - ' + loot + ' x' + organized_loot[member][loot] + "\n";
+      output += '  - ' + organized_loot[member][loot].name + ' x' + organized_loot[member][loot] + "\n";
     }
     output += "\n";
   }
@@ -319,3 +327,10 @@ function displayList(organized_loot) {
 
   return output;
 }
+
+// DEBUGGING
+$(document).ready(() => {
+  let debugTimer = setInterval(() => {
+    $('#debug-output').html('<pre>' + JSON.stringify(current_session, null, 4) + '</pre>');
+  }, 2000)
+})
