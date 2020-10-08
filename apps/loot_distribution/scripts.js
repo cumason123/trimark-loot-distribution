@@ -6,6 +6,7 @@ let module_ids = {};
 let member_ids = {};
 
 let current_session = {
+  total_value: 0,
   members: [],
   modules: [],
   distribution: []
@@ -72,12 +73,9 @@ function deleteMember(hash) {
    * @param hash string representing the key within member_ids which points
    *     to this member
    */
-  number_of_members -= 1;
-  for (key in member_ids[hash]) {
-    const node = document.getElementById(member_ids[hash][key]);
-    node.remove();
-  }
-  delete member_ids[hash];
+  const node = document.getElementById('member_' + hash);
+  node.remove()
+  delete current_session.members[hash];
 }
 
 function addModule() {
@@ -159,50 +157,56 @@ function addModule() {
     let module_id = this_id[this_id.length - 1];
 
     current_session.modules[module_id].quantity = parseInt($(this).val());
-  })
+  });
 
   $('#module_cost_' + hash).on('change', function (e) {
     let this_id = $(this).attr('id').split('_');
     let module_id = this_id[this_id.length - 1];
 
     current_session.modules[module_id].cost = parseInt($(this).val().replace(/,/g,''));
-  })
+  });
 }
 
 function addMember() {
   /**
    * Adds an empty member row to website
    */
-  hash = parseInt(hash) + 1;
+  const hash = current_session.members.length;
+
+  current_session.members[hash] = {
+    name: ''
+  }
 
   const membersContainer = document.getElementById("members");
   const child = document.createElement("div");
-  const ids = {
-    member: `member_${hash}`,
-    deleteButton: `delete_member_${hash}`,
-  };
-  member_ids[hash] = ids;
-  current_session.members[hash] = ids;
+  child.setAttribute('id', 'member_' + hash);
+
   child.innerHTML = `
     <div>
       <input
-      id="${ids.member}"
+      id="member_name_${hash}"
       placeholder="e.g. DONTSHOOT"
       class="member"
       type="text"
       />
 
       <button
-      id="${ids.deleteButton}"
+      id="member_delete_${hash}"
       class="deleteButton"
       onclick="deleteMember(${hash})">delete</button>
     </div>
   `;
   membersContainer.appendChild(child);
-  number_of_members += 1;
+
+  $('#member_name_' + hash).on('change', function (e) {
+    let this_id = $(this).attr('id').split('_');
+    let member_id = this_id[this_id.length - 1];
+
+    current_session.members[member_id].name = $(this).val();
+  });
 }
 
-function give_to(member, module_name, cost) {
+function give_to(member, item_id, module_name, cost) {
   /**
    * Gives an item to a member and increments the quantity of this
    * item that member has and that members total loot value
@@ -211,12 +215,24 @@ function give_to(member, module_name, cost) {
    * @param module_name key into member which points to the number of this module member has
    * @param cost number representing the current estimated loot value of this module
    */
-  if (module_name in member) {
-    member[module_name] += 1;
-  } else {
-    member[module_name] = 1;
+  let updated = false;
+
+  for (item in current_session.distribution[member].loot) {
+    if (current_session.distribution[member].loot[item].name == module_name) {
+      current_session.distribution[member].loot[item].quantity++;
+      updated = true;
+    }
   }
-  member.loot_value += cost;
+  if (!updated) {
+    let item = {
+      item_id: item_id,
+      name: module_name,
+      quantity: 1,
+      cost: cost
+    };
+    current_session.distribution[member].loot.push(item);
+  }
+  current_session.distribution[member].loot_value += cost;
 }
 
 function calculate_distribution() {
@@ -234,74 +250,73 @@ function calculate_distribution() {
    *     then randomly select an eligible member to hand module to. We then repeat step 2.
    */
 
-  let loot = [];
-  let total_value = 0;
-  let modules = current_session.modules;
+  let modules = [...current_session.modules];
+  current_session.distribution = [];
 
   // Step 1: sort modules
-  modules.sort((module1, module2) => (module1.cost > module2.cost ? -1 : 1));
+  modules.sort((module1, module2) => {return (module1.cost > module2.cost ? -1 : 1)});
 
-  for (hash in member_ids) {
-    // Find member
-    const member_id = member_ids[hash];
-    const member_name = document.getElementById(member_id.member).value;
-
+  for (member_id in current_session.members) {
     // Initialize member loot value to 0
-    if (member_name != "") {
-      loot.push({ name: member_name, loot_value: 0 });
+    let distribution = {
+      name: current_session.members[member_id].name,
+      loot_value: 0,
+      loot: []
     }
+    current_session.distribution.push(distribution);
   }
-console.log(modules)
+
   // Iterate through modules
   for (let i = 0; i < modules.length; i++) {
-    const { module_name, cost, quantity } = modules[i];
+    const { item_id, name, cost, quantity } = modules[i];
+    current_session.total_value += (cost * quantity);
 
     // Iterate through module quantity
     for (let k = 0; k < quantity; k++) {
       // Step 2: Find eligible members
       // Sort members in order of loot value
-      loot.sort((member1, member2) =>
+      current_session.distribution.sort((member1, member2) =>
         member1.loot_value > member2.loot_value ? 1 : -1
       );
-      const min_loot_val = loot[0].loot_value;
+      const min_loot_val = current_session.distribution[0].loot_value;
 
       // Find eligible members
       let eligible_users = [];
-      for (let j = 0; j < loot.length; j++) {
-        const member = loot[j];
-        if (member.loot_value != min_loot_val) {
-          break;
+      for (let j = 0; j < current_session.distribution.length; j++) {
+        const member = j;
+        if (current_session.distribution[member].loot_value != min_loot_val) {
+          continue;
         }
         eligible_users.push(j);
       }
 
       // Step 3: tie breaker
-      let randomly_chosen_member = loot[random(eligible_users)];
-      give_to(randomly_chosen_member, module_name, cost);
+      let randomly_chosen_member = random(eligible_users);
+      give_to(randomly_chosen_member, item_id, name, cost);
     }
   }
 
   // Render loot
-  let organized_loot = {};
-  for (let i = 0; i < loot.length; i++) {
-    const name = loot[i].name;
-    organized_loot[name] = JSON.parse(JSON.stringify(loot[i]));
-    delete organized_loot[name].name;
-  }
+  // let organized_loot = {};
+  // for (let i = 0; i < loot.length; i++) {
+  //   const name = loot[i].name;
+  //   organized_loot[name] = JSON.parse(JSON.stringify(loot[i]));
+  //   delete organized_loot[name].name;
+  // }
 
-  for (member in organized_loot) {
-    total_value += organized_loot[member].loot_value;
-    organized_loot[member].loot_value = add_commas(
-      organized_loot[member].loot_value
-    );
-  }
+  // for (member in organized_loot) {
+  //   current_session.total_value += organized_loot[member].loot_value;
+  //   organized_loot[member].loot_value = add_commas(
+  //     organized_loot[member].loot_value
+  //   );
+  // }
 
-  organized_loot.total_value = add_commas(total_value);
+  // organized_loot.total_value = add_commas(current_session.total_value);
   const result = document.getElementById("result");
-  result.innerHTML = displayList(organized_loot);
+  result.innerHTML = displayList();
 }
 
-function displayList(organized_loot) {
+function displayList() {
   /**
    * Styled rendering of the loot distribution
    */
@@ -311,19 +326,14 @@ function displayList(organized_loot) {
 
   output += "\n";
 
-  for (member in organized_loot) {
-    if (member == "total_value") {
-      continue;
-    }
-
-    output += '- **' + member + '** - _' + organized_loot[member].loot_value + ' ISK_' + "\n";
-    for (loot in organized_loot[member]) {
-      if (loot == 'loot_value') { continue; }
-      output += '  - ' + organized_loot[member][loot].name + ' x' + organized_loot[member][loot] + "\n";
+  for (member in current_session.distribution) {
+    output += '- **' + current_session.distribution[member].name + '** - _' + add_commas(current_session.distribution[member].loot_value) + ' ISK_' + "\n";
+    for (hash in current_session.distribution[member].loot) {
+      output += '  - ' + current_session.distribution[member].loot[hash].name + ' x' + current_session.distribution[member].loot[hash].quantity + "\n";
     }
     output += "\n";
   }
-  output += '**Total Value: ' + organized_loot.total_value + ' ISK**';
+  output += '**Total Value: ' + add_commas(current_session.total_value) + ' ISK**';
 
   return output;
 }
