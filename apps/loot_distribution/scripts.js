@@ -83,6 +83,7 @@ function deleteMember(hash) {
    * @param hash string representing the key within member_ids which points
    *     to this member
    */
+  $("#member_name_" + hash).select2("destroy");
   const node = document.getElementById('member_' + hash);
   node.remove()
   delete current_session.members[hash];
@@ -213,13 +214,11 @@ function addMember(member_data = false) {
 
   child.innerHTML = `
     <div>
-      <input
+      <select
       id="member_name_${hash}"
-      placeholder="e.g. DONTSHOOT"
-      class="member"
-      type="text"
-      value="${current_session.members[hash].name}" 
-      />
+      class="member">
+        <option></option>
+      </select>
 
       <button
       id="member_delete_${hash}"
@@ -229,24 +228,31 @@ function addMember(member_data = false) {
   `;
   membersContainer.appendChild(child);
 
-  $('#member_name_' + hash).on('change', function (e) {
+  $("#member_name_" + hash).select2({
+    data: user_list,
+    placeholder: "e.g. DONTSHOOT",
+    allowClear: true,
+    tags: true
+  });
+  $("#member_name_" + hash).val(current_session.members[hash].name);
+  $("#member_name_" + hash).trigger('change');
+
+  $("#member_name_" + hash).on("select2:select", function (e) {
     let this_id = $(this).attr('id').split('_');
     let member_id = this_id[this_id.length - 1];
 
-    let member_name = $(this).val();
-    current_session.members[member_id].name = member_name;
+    current_session.members[member_id].name = e.params.data.text;
 
-    console.log('Checking if user ' + member_name + ' exists...');
     let user_exists = false;
     for (user in user_list) {
-      if (user_list[user].text == member_name) {
+      if (user_list[user].text == current_session.members[member_id].name) {
         user_exists = true;
       }
     }
-    if (!user_exists && member_name != '') {
+    if (!user_exists && current_session.members[member_id].name != '') {
       user_list.push({
-        id: user_list.length,
-        text: member_name
+        id: current_session.members[member_id].name,
+        text: current_session.members[member_id].name
       });
       saveToStore('user_list', user_list);
     }
