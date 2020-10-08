@@ -10,7 +10,7 @@ const sort_by = {
   USERNAME: 'username'
 }
 
-function copy() {
+function download_loot() {
   /**
    * Copies capture div and saves image as loot.png
    */
@@ -302,7 +302,6 @@ function calculate_distribution(sort = sort_by.ISK) {
   organized_loot.total_value = add_commas(total_value);
   const result = document.getElementById("result");
   result.innerHTML = displayList(organized_loot);
-  copy();
 }
 
 function displayList(organized_loot) {
