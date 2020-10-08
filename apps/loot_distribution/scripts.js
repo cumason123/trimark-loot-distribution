@@ -5,7 +5,7 @@ let hash = 0;
 let module_ids = {};
 let member_ids = {};
 
-function copy() {
+function download_loot() {
   /**
    * Copies capture div and saves image as loot.png
    */
@@ -290,7 +290,6 @@ function calculate_distribution() {
   organized_loot.total_value = add_commas(total_value);
   const result = document.getElementById("result");
   result.innerHTML = displayList(organized_loot);
-  copy();
 }
 
 function displayList(organized_loot) {
