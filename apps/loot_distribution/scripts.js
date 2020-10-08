@@ -5,11 +5,6 @@ let hash = 0;
 let module_ids = {};
 let member_ids = {};
 
-const sort_by = {
-  ISK: 'isk',
-  USERNAME: 'username'
-}
-
 function download_loot() {
   /**
    * Copies capture div and saves image as loot.png
@@ -197,7 +192,7 @@ function give_to(member, module_name, cost) {
   member.loot_value += cost;
 }
 
-function calculate_distribution(sort = sort_by.ISK) {
+function calculate_distribution() {
   /**
    * Scans through all modules and evenly distributes the modules to all users based on
    * module isk value and renders it on the website.
@@ -216,17 +211,12 @@ function calculate_distribution(sort = sort_by.ISK) {
   let total_value = 0;
   let modules = [];
 
-  // Extract config options from form
-  if ($("#sortByName").prop("checked")) { sort = sort_by.USERNAME; }
-
-  // Extract module data from HTML
-  // TODO: refactor this loop
   for (hash in module_ids) {
     // Find module
     const module_id = module_ids[hash];
     let module_selection = $("#" + module_id.module).select2("data");
 
-    // Parse data
+    // Get module data
     const module_name = module_selection[0].text;
     const quantity = parseInt(
       document.getElementById(module_id.quantity).value
@@ -235,15 +225,15 @@ function calculate_distribution(sort = sort_by.ISK) {
       document.getElementById(module_id.cost).value.replaceAll(",", "")
     );
 
-    // Store data
+    // add module to array
     modules.push({ module_name, quantity, cost });
   }
 
-  // Step 1: sort modules by cost descending
+  // Step 1: sort modules
   modules.sort((module1, module2) => (module1.cost > module2.cost ? -1 : 1));
 
-  // Extract members from HTML
   for (hash in member_ids) {
+    // Find member
     const member_id = member_ids[hash];
     const member_name = document.getElementById(member_id.member).value;
 
@@ -253,7 +243,7 @@ function calculate_distribution(sort = sort_by.ISK) {
     }
   }
 
-  // Assign modules to members
+  // Iterate through modules
   for (let i = 0; i < modules.length; i++) {
     const { module_name, cost, quantity } = modules[i];
 
@@ -283,13 +273,7 @@ function calculate_distribution(sort = sort_by.ISK) {
   }
 
   // Render loot
-  // Loot is sorted by isk descending by default
-  if (sort == sort_by.USERNAME){
-    loot.sort((member1, member2) => (member1.name.localeCompare(member2.name)));
-  }
-
   let organized_loot = {};
-
   for (let i = 0; i < loot.length; i++) {
     const name = loot[i].name;
     organized_loot[name] = JSON.parse(JSON.stringify(loot[i]));
