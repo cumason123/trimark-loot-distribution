@@ -150,7 +150,9 @@ function addModule(module_data = false) {
     data: echoes_items,
     placeholder: "e.g. Corpum C-Type Medium Laser",
     allowClear: true,
-    tags: true
+    tags: true,
+    minimumInputLength: 2,
+    matcher: customMatcher
   });
   $("#module_name_" + hash).val(current_session.modules[hash].item_id);
   $("#module_name_" + hash).trigger('change');
