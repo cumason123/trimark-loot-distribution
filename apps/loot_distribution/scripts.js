@@ -339,6 +339,10 @@ function calculate_distribution() {
   current_session.total_value = 0;
   // Iterate through modules
   for (let i = 0; i < modules.length; i++) {
+    if (typeof modules[i] === 'undefined') {
+      continue;
+    }
+
     const { item_id, name, cost, quantity } = modules[i];
     current_session.total_value += (cost * quantity);
 
