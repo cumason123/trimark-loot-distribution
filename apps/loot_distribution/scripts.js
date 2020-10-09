@@ -136,7 +136,7 @@ function addModule(module_data = false) {
             <button
             id="module_delete_${hash}"
             class="deleteButton btn btn-secondary my-2 my-sm-0"
-            onclick="deleteModule(${hash})">delete</button>
+            onclick="deleteModule(${hash})">Delete</button>
         </div>
     `;
   itemsContainer.appendChild(child);
@@ -237,7 +237,7 @@ function addMember(member_data = false) {
       <button
       id="member_delete_${hash}"
       class="deleteButton btn btn-secondary my-2 my-sm-0"
-      onclick="deleteMember(${hash})">delete</button>
+      onclick="deleteMember(${hash})">Delete</button>
     </div>
   `;
   membersContainer.appendChild(child);
