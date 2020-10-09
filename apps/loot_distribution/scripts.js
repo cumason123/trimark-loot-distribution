@@ -303,21 +303,20 @@ function give_to(member, item_id, module_name, cost) {
   current_session.distribution[member].loot_value += cost;
 }
 
+/**
+ * Scans through all modules and evenly distributes the modules to all users based on
+ * module isk value and renders it on the website.
+ *
+ * ALGORITHM:
+ * First: Sort modules in order of value (e.g. most expensive first).
+ * Second: Determine who are the next eligible member(s) to receive a module.
+ *     Members are eligible to receive a module if they either have the least
+ *     total loot_value, or they are tied with members who currently have the least
+ *     total loot_value.
+ * Third: Give one module to eligible member. If there are more than one eligible members,
+ *     then randomly select an eligible member to hand module to. We then repeat step 2.
+ */
 function calculate_distribution() {
-  /**
-   * Scans through all modules and evenly distributes the modules to all users based on
-   * module isk value and renders it on the website.
-   *
-   * ALGORITHM:
-   * First: Sort modules in order of value (e.g. most expensive first).
-   * Second: Determine who are the next eligible member(s) to receive a module.
-   *     Members are eligible to receive a module if they either have the least
-   *     total loot_value, or they are tied with members who currently have the least
-   *     total loot_value.
-   * Third: Give one module to eligible member. If there are more than one eligible members,
-   *     then randomly select an eligible member to hand module to. We then repeat step 2.
-   */
-
   let modules = [...current_session.modules];
   current_session.distribution = [];
 
@@ -334,6 +333,7 @@ function calculate_distribution() {
     current_session.distribution.push(distribution);
   }
 
+  current_session.total_value = 0;
   // Iterate through modules
   for (let i = 0; i < modules.length; i++) {
     const { item_id, name, cost, quantity } = modules[i];
