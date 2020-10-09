@@ -146,7 +146,9 @@ function addModule(module_data = false) {
     data: echoes_items,
     placeholder: "e.g. Corpum C-Type Medium Laser",
     allowClear: true,
-    tags: true
+    tags: true,
+    minimumInputLength: 2,
+    matcher: customMatcher
   });
   $("#module_name_" + hash).val(current_session.modules[hash].item_id);
   $("#module_name_" + hash).trigger('change');
@@ -442,4 +444,28 @@ function clearSession() {
     $('#members').html('');
     $('#result').html('');
   }
+}
+
+function customMatcher(params, data) {
+  if ($.trim(params.term) === '') {
+    return data;
+  }
+
+  if (typeof data.text === 'undefined') {
+    return null;
+  }
+
+  let words = params.term.split(' ');
+  for (word in words) {
+    if (data.text.indexOf(words[word]) > -1) {
+      var modifiedData = $.extend({}, data, true);
+      //modifiedData.text += ' (matched)';
+
+      // You can return modified objects from here
+      // This includes matching the `children` how you want in nested data sets
+      return modifiedData;
+    }
+  }
+
+  return null;
 }
