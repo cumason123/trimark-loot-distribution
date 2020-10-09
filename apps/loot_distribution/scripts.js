@@ -147,7 +147,9 @@ function addModule(module_data = false) {
     data: echoes_items,
     placeholder: "e.g. Corpum C-Type Medium Laser",
     allowClear: true,
-    tags: true
+    tags: true,
+    minimumInputLength: 2,
+    matcher: customMatcher
   });
   $("#module_name_" + hash).val(current_session.modules[hash].item_id);
   $("#module_name_" + hash).trigger('change');
@@ -164,24 +166,27 @@ function addModule(module_data = false) {
     }
     $("#module_quantity_" + module_id).val(current_session.modules[module_id].quantity);
 
-    let item_id = e.params.data.id;
-    let fetchMarketData = $.getJSON(api_base_uri + "/market-stats/" + item_id, function (data) {
+    /** 
+     * Commented out market API requests for the moment until it gets more reliable.
+     */
+    // let item_id = e.params.data.id;
+    // let fetchMarketData = $.getJSON(api_base_uri + "/market-stats/" + item_id, function (data) {
 
-      let cost = "sell" in data ? data[data.length - 1].sell : data[data.length - 1].highest_buy;
+    //   let cost = "sell" in data ? data[data.length - 1].sell : data[data.length - 1].highest_buy;
 
-      $("#module_cost_" + module_id).val(add_commas(cost));
-      current_session.modules[module_id].cost = cost;
+    //   $("#module_cost_" + module_id).val(add_commas(cost));
+    //   current_session.modules[module_id].cost = cost;
 
-      saveToStore('current_session', current_session);
-    });
+    //   saveToStore('current_session', current_session);
+    // });
 
-    fetchMarketData.fail(() => {
-      let cost = 0;
-      $("#module_cost_" + module_id).val(add_commas(cost));
-      current_session.modules[module_id].cost = cost;
+    // fetchMarketData.fail(() => {
+    //   let cost = 0;
+    //   $("#module_cost_" + module_id).val(add_commas(cost));
+    //   current_session.modules[module_id].cost = cost;
 
-      saveToStore('current_session', current_session);
-    });
+    //   saveToStore('current_session', current_session);
+    // });
   });
 
   $('#module_quantity_' + hash).on('change', function (e) {
@@ -301,21 +306,20 @@ function give_to(member, item_id, module_name, cost) {
   current_session.distribution[member].loot_value += cost;
 }
 
+/**
+ * Scans through all modules and evenly distributes the modules to all users based on
+ * module isk value and renders it on the website.
+ *
+ * ALGORITHM:
+ * First: Sort modules in order of value (e.g. most expensive first).
+ * Second: Determine who are the next eligible member(s) to receive a module.
+ *     Members are eligible to receive a module if they either have the least
+ *     total loot_value, or they are tied with members who currently have the least
+ *     total loot_value.
+ * Third: Give one module to eligible member. If there are more than one eligible members,
+ *     then randomly select an eligible member to hand module to. We then repeat step 2.
+ */
 function calculate_distribution() {
-  /**
-   * Scans through all modules and evenly distributes the modules to all users based on
-   * module isk value and renders it on the website.
-   *
-   * ALGORITHM:
-   * First: Sort modules in order of value (e.g. most expensive first).
-   * Second: Determine who are the next eligible member(s) to receive a module.
-   *     Members are eligible to receive a module if they either have the least
-   *     total loot_value, or they are tied with members who currently have the least
-   *     total loot_value.
-   * Third: Give one module to eligible member. If there are more than one eligible members,
-   *     then randomly select an eligible member to hand module to. We then repeat step 2.
-   */
-
   let modules = [...current_session.modules];
   current_session.distribution = [];
 
@@ -332,6 +336,7 @@ function calculate_distribution() {
     current_session.distribution.push(distribution);
   }
 
+  current_session.total_value = 0;
   // Iterate through modules
   for (let i = 0; i < modules.length; i++) {
     const { item_id, name, cost, quantity } = modules[i];
@@ -445,4 +450,28 @@ function clearSession() {
     $('#members').html('');
     $('#result').html('');
   }
+}
+
+function customMatcher(params, data) {
+  if ($.trim(params.term) === '') {
+    return data;
+  }
+
+  if (typeof data.text === 'undefined') {
+    return null;
+  }
+
+  let words = params.term.split(' ');
+  for (word in words) {
+    if (data.text.indexOf(words[word]) > -1) {
+      var modifiedData = $.extend({}, data, true);
+      //modifiedData.text += ' (matched)';
+
+      // You can return modified objects from here
+      // This includes matching the `children` how you want in nested data sets
+      return modifiedData;
+    }
+  }
+
+  return null;
 }
