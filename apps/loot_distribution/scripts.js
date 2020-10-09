@@ -15,7 +15,6 @@ let new_session = {
 let current_session = {...new_session};
 
 let last_session = loadFromStore('current_session');
-console.log(last_session);
 
 let user_list = loadFromStore('user_list');
 if (!user_list) {
@@ -136,13 +135,15 @@ function addModule(module_data = false) {
 
             <button
             id="module_delete_${hash}"
-            class="deleteButton"
+            class="deleteButton btn btn-secondary my-2 my-sm-0"
             onclick="deleteModule(${hash})">delete</button>
         </div>
     `;
   itemsContainer.appendChild(child);
 
   $("#module_name_" + hash).select2({
+    theme: 'bootstrap',
+    width: '33%',
     data: echoes_items,
     placeholder: "e.g. Corpum C-Type Medium Laser",
     allowClear: true,
@@ -230,13 +231,15 @@ function addMember(member_data = false) {
 
       <button
       id="member_delete_${hash}"
-      class="deleteButton"
+      class="deleteButton btn btn-secondary my-2 my-sm-0"
       onclick="deleteMember(${hash})">delete</button>
     </div>
   `;
   membersContainer.appendChild(child);
 
   $("#member_name_" + hash).select2({
+    theme: 'bootstrap',
+    width: '33%',
     data: user_list,
     placeholder: "e.g. DONTSHOOT",
     allowClear: true,
