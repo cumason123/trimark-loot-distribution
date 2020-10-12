@@ -466,16 +466,18 @@ function customMatcher(params, data) {
   }
 
   let words = params.term.split(' ');
+  let match = true;
   for (word in words) {
-    if (data.text.indexOf(words[word]) > -1) {
-      var modifiedData = $.extend({}, data, true);
-      //modifiedData.text += ' (matched)';
-
-      // You can return modified objects from here
-      // This includes matching the `children` how you want in nested data sets
-      return modifiedData;
+    let term_word_upper = words[word].toUpperCase();
+    let text_upper = data.text.toUpperCase();
+    if (text_upper.indexOf(term_word_upper) == -1) {
+        match = false;
     }
   }
 
-  return null;
+  if (!match) {
+    return null;
+  } else {
+    return data;
+  }
 }
