@@ -111,12 +111,17 @@ function addModule(module_data = false) {
 
   child.innerHTML = `
         <div>
+            <p>
+            <label for="module_name_${hash}">Module name:</label><br />
             <select
             id="module_name_${hash}"
             class="module">
               <option></option>
             </select>
+            </p>
 
+            <p>
+            <label for="module_quantity_${hash}">Quantity:</label><br />
             <input 
             id="module_quantity_${hash}"
             placeholder="quantity" 
@@ -124,7 +129,10 @@ function addModule(module_data = false) {
             type="number" 
             value="${current_session.modules[hash].quantity}" 
             />
+            </p>
 
+            <p>
+            <label for="module_cost_${hash}">Cost:</label><br />
             <input
             id="module_cost_${hash}"
             placeholder="cost" 
@@ -132,18 +140,21 @@ function addModule(module_data = false) {
             type="text" 
             value="${add_commas(current_session.modules[hash].cost)}" 
             />
+            </p>
 
+            <p>
             <button
             id="module_delete_${hash}"
             class="deleteButton btn btn-secondary my-2 my-sm-0"
             onclick="deleteModule(${hash})">Delete</button>
+            </p>
         </div>
     `;
   itemsContainer.appendChild(child);
 
   $("#module_name_" + hash).select2({
     theme: 'bootstrap',
-    width: '33%',
+    // width: '100%',
     data: echoes_items,
     placeholder: "e.g. Corpum C-Type Medium Laser",
     allowClear: true,
@@ -228,23 +239,28 @@ function addMember(member_data = false) {
 
   child.innerHTML = `
     <div>
+      <p>
+      <label for="member_name_${hash}">Member name:</label>
       <select
       id="member_name_${hash}"
       class="member">
         <option></option>
       </select>
+      </p>
 
+      <p>
       <button
       id="member_delete_${hash}"
       class="deleteButton btn btn-secondary my-2 my-sm-0"
       onclick="deleteMember(${hash})">Delete</button>
+      </p>
     </div>
   `;
   membersContainer.appendChild(child);
 
   $("#member_name_" + hash).select2({
     theme: 'bootstrap',
-    width: '33%',
+    // width: '100%',
     data: user_list,
     placeholder: "e.g. DONTSHOOT",
     allowClear: true,
@@ -398,13 +414,6 @@ function displayList() {
 
   return output;
 }
-
-// DEBUGGING
-$(document).ready(() => {
-  //let debugTimer = setInterval(() => {
-  //  $('#debug-output').html('<pre>' + JSON.stringify(current_session, null, 4) + '</pre>');
-  //}, 2000)
-});
 
 function saveToStore(key, val) {
   localStorage.setItem(key, JSON.stringify(val));
