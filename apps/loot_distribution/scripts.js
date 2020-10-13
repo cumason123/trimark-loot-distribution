@@ -107,16 +107,21 @@ function addModule(module_data = false) {
 
   const itemsContainer = document.getElementById("modules");
   const child = document.createElement("div");
+  child.setAttribute('class', 'trimark-module')
   child.setAttribute('id', 'module_' + hash);
 
   child.innerHTML = `
-        <div>
+            <p>
+            <label for="module_name_${hash}">Module name:</label><br />
             <select
             id="module_name_${hash}"
             class="module">
               <option></option>
             </select>
+            </p>
 
+            <p>
+            <label for="module_quantity_${hash}">Quantity:</label><br />
             <input 
             id="module_quantity_${hash}"
             placeholder="quantity" 
@@ -124,7 +129,10 @@ function addModule(module_data = false) {
             type="number" 
             value="${current_session.modules[hash].quantity}" 
             />
+            </p>
 
+            <p>
+            <label for="module_cost_${hash}">Cost:</label><br />
             <input
             id="module_cost_${hash}"
             placeholder="cost" 
@@ -132,18 +140,20 @@ function addModule(module_data = false) {
             type="text" 
             value="${add_commas(current_session.modules[hash].cost)}" 
             />
+            </p>
 
+            <p>
             <button
             id="module_delete_${hash}"
             class="deleteButton btn btn-secondary my-2 my-sm-0"
             onclick="deleteModule(${hash})">Delete</button>
-        </div>
+            </p>
     `;
   itemsContainer.appendChild(child);
 
   $("#module_name_" + hash).select2({
     theme: 'bootstrap',
-    width: '33%',
+    // width: '100%',
     data: echoes_items,
     placeholder: "e.g. Corpum C-Type Medium Laser",
     allowClear: true,
@@ -225,26 +235,29 @@ function addMember(member_data = false) {
   const membersContainer = document.getElementById("members");
   const child = document.createElement("div");
   child.setAttribute('id', 'member_' + hash);
-
+  child.setAttribute('class', 'trimark-member')
   child.innerHTML = `
-    <div>
+      <p>
+      <label for="member_name_${hash}">Member name:</label>
       <select
       id="member_name_${hash}"
       class="member">
         <option></option>
       </select>
+      </p>
 
+      <p>
       <button
       id="member_delete_${hash}"
       class="deleteButton btn btn-secondary my-2 my-sm-0"
       onclick="deleteMember(${hash})">Delete</button>
-    </div>
+      </p>
   `;
   membersContainer.appendChild(child);
 
   $("#member_name_" + hash).select2({
     theme: 'bootstrap',
-    width: '33%',
+    // width: '100%',
     data: user_list,
     placeholder: "e.g. DONTSHOOT",
     allowClear: true,
@@ -399,13 +412,6 @@ function displayList() {
   return output;
 }
 
-// DEBUGGING
-$(document).ready(() => {
-  //let debugTimer = setInterval(() => {
-  //  $('#debug-output').html('<pre>' + JSON.stringify(current_session, null, 4) + '</pre>');
-  //}, 2000)
-});
-
 function saveToStore(key, val) {
   localStorage.setItem(key, JSON.stringify(val));
 }
@@ -466,16 +472,18 @@ function customMatcher(params, data) {
   }
 
   let words = params.term.split(' ');
+  let match = true;
   for (word in words) {
-    if (data.text.indexOf(words[word]) > -1) {
-      var modifiedData = $.extend({}, data, true);
-      //modifiedData.text += ' (matched)';
-
-      // You can return modified objects from here
-      // This includes matching the `children` how you want in nested data sets
-      return modifiedData;
+    let term_word_upper = words[word].toUpperCase();
+    let text_upper = data.text.toUpperCase();
+    if (text_upper.indexOf(term_word_upper) == -1) {
+        match = false;
     }
   }
 
-  return null;
+  if (!match) {
+    return null;
+  } else {
+    return data;
+  }
 }
