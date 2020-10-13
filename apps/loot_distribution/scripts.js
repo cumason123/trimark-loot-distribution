@@ -107,10 +107,10 @@ function addModule(module_data = false) {
 
   const itemsContainer = document.getElementById("modules");
   const child = document.createElement("div");
+  child.setAttribute('class', 'trimark-module')
   child.setAttribute('id', 'module_' + hash);
 
   child.innerHTML = `
-        <div>
             <p>
             <label for="module_name_${hash}">Module name:</label><br />
             <select
@@ -148,7 +148,6 @@ function addModule(module_data = false) {
             class="deleteButton btn btn-secondary my-2 my-sm-0"
             onclick="deleteModule(${hash})">Delete</button>
             </p>
-        </div>
     `;
   itemsContainer.appendChild(child);
 
@@ -236,9 +235,8 @@ function addMember(member_data = false) {
   const membersContainer = document.getElementById("members");
   const child = document.createElement("div");
   child.setAttribute('id', 'member_' + hash);
-
+  child.setAttribute('class', 'trimark-member')
   child.innerHTML = `
-    <div>
       <p>
       <label for="member_name_${hash}">Member name:</label>
       <select
@@ -254,7 +252,6 @@ function addMember(member_data = false) {
       class="deleteButton btn btn-secondary my-2 my-sm-0"
       onclick="deleteMember(${hash})">Delete</button>
       </p>
-    </div>
   `;
   membersContainer.appendChild(child);
 

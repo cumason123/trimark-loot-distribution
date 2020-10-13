@@ -8,17 +8,32 @@ body {
 .form-controls {
   text-align: right;
 }
+
 #result {
   width: 100%;
   min-height: 300px;
 }
 
 .select2 {
-  width: 33% !important;
+  width: 33%;
 }
 
-@media (max-width: 767.98px) {
+@media (max-width: 1000px) {
   input, select, .select2 {
-    width: 100% !important;
+    width: 100%;
+  }  
+}
+
+@media (min-width: 1000px) {
+  .trimark-module, .trimark-member {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    align-items: flex-end;
+    justify-content: flex-start;
+  }
+  input, select, .select2 {
+    width: 23vw;
+    margin-right: 30px;
   }  
 }
