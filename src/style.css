@@ -1,0 +1,39 @@
+body {
+  padding-top: 5rem;
+}
+.content {
+  padding: 3rem 1.5rem;
+  /* text-align: center; */
+}
+.form-controls {
+  text-align: right;
+}
+
+#result {
+  width: 100%;
+  min-height: 300px;
+}
+
+.select2 {
+  width: 33%;
+}
+
+@media (max-width: 1000px) {
+  input, select, .select2 {
+    width: 100% !important;
+  }  
+}
+
+@media (min-width: 1000px) {
+  .trimark-module, .trimark-member {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    align-items: flex-end;
+    justify-content: flex-start;
+  }
+  input, select, .select2 {
+    width: 23vw;
+    margin-right: 30px;
+  }  
+}
