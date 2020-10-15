@@ -3,14 +3,13 @@ import os
 from pathlib import Path
 import typing
 
+# Given Path('src/old/index.html') returns str('old/index.html')
+remove_src_folder = lambda path: str(Path(*path.parts[1:]))
 
+# Environment variables
 bucket_name = os.environ.get('aws_s3_bucket')
 access_key = os.environ.get('aws_key_id')
 access_secret = os.environ.get('aws_secret_access_key')
-
-
-# Given Path('src/old/index.html') returns str('old/index.html')
-remove_src_folder = lambda path: str(Path(*path.parts[1:]))
 
 
 def upload_dir(root: str, s3: typing.Any):
@@ -49,27 +48,27 @@ def upload_dir(root: str, s3: typing.Any):
 		elif filepath.suffix == '.css':
 			args['ContentType'] = 'text/css'
 
-
 		s3.upload_file(
 			file, 
 			bucket_name, 
 			remove_src_folder(filepath), 
 			ExtraArgs=args
 		)
+
 		print(f"Uploaded {file} as /{filepath.name}")
 
 
 if __name__ == '__main__':
+	# Check env variables
+	if not bucket_name or not access_key or not access_secret:
+		print(f"Please set environment variables")
+		exit(1)
+
 	# Create s3 bucket client
 	s3 = boto3.client(
 		's3', 
 		aws_access_key_id=access_key, 
 		aws_secret_access_key=access_secret
 	)
-
-	# Check env variables
-	if not bucket_name or not access_key or not access_secret:
-		print(f"Please set environment variables")
-		exit(1)
 
 	upload_dir('./src', s3)
