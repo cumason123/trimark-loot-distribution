@@ -5,7 +5,7 @@ from pathlib import Path
 
 if __name__ == '__main__':
 	# Will only upload files not directories
-	root = Path('./apps/loot_distribution')
+	root = Path('./src')
 	files = os.listdir(root)
 	filepaths = [os.path.join(root, file) for file in files]
 
