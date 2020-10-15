@@ -38,24 +38,24 @@ def upload_dir(root: str, s3: typing.Any):
 		# Handle filetype, defaults with bytestream octet
 		if os.path.isdir(filepath):
 			upload_dir(file, s3)
+		else:
+			if filepath.suffix == '.html':
+				args['ContentType'] = 'text/html'
 
-		elif filepath.suffix == '.html':
-			args['ContentType'] = 'text/html'
+			elif filepath.suffix == '.js':
+				args['ContentType'] = 'application/json'
 
-		elif filepath.suffix == '.js':
-			args['ContentType'] = 'application/json'
+			elif filepath.suffix == '.css':
+				args['ContentType'] = 'text/css'
 
-		elif filepath.suffix == '.css':
-			args['ContentType'] = 'text/css'
+			s3.upload_file(
+				file, 
+				bucket_name, 
+				remove_src_folder(filepath), 
+				ExtraArgs=args
+			)
 
-		s3.upload_file(
-			file, 
-			bucket_name, 
-			remove_src_folder(filepath), 
-			ExtraArgs=args
-		)
-
-		print(f"Uploaded {file} as /{filepath.name}")
+			print(f"Uploaded {file} as /{filepath.name}")
 
 
 if __name__ == '__main__':
