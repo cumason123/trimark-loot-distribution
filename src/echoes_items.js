@@ -309,7 +309,7 @@ let echoes_items = [
   },
   {
     "id": "11719000004",
-    "text": "Sentry Damage Augmentor II"
+    "text": "Drone Firepower Augmentor II"
   },
   {
     "id": "11719020002",
@@ -797,7 +797,7 @@ let echoes_items = [
   },
   {
     "id": "11719000006",
-    "text": "Sentry Damage Augmentor III"
+    "text": "Drone Firepower Augmentor III"
   },
   {
     "id": "11719020004",
@@ -1269,7 +1269,7 @@ let echoes_items = [
   },
   {
     "id": "11719000008",
-    "text": "Sentry Damage Augmentor IV"
+    "text": "Drone Firepower Augmentor IV"
   },
   {
     "id": "11719020006",
@@ -8945,7 +8945,7 @@ let echoes_items = [
   },
   {
     "id": "61719000002",
-    "text": "Sentry Damage Augmentor I Blueprint"
+    "text": "Drone Firepower Augmentor I Blueprint"
   },
   {
     "id": "80500700230",
@@ -9177,7 +9177,7 @@ let echoes_items = [
   },
   {
     "id": "61719000004",
-    "text": "Sentry Damage Augmentor II Blueprint"
+    "text": "Drone Firepower Augmentor II Blueprint"
   },
   {
     "id": "61719020002",
@@ -9505,7 +9505,7 @@ let echoes_items = [
   },
   {
     "id": "61719000006",
-    "text": "Sentry Damage Augmentor III Blueprint"
+    "text": "Drone Firepower Augmentor III Blueprint"
   },
   {
     "id": "61719020004",
@@ -9597,7 +9597,7 @@ let echoes_items = [
   },
   {
     "id": "11719000002",
-    "text": "Sentry Damage Augmentor I"
+    "text": "Drone Firepower Augmentor I"
   },
   {
     "id": "51006000000",
