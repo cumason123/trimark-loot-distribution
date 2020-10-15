@@ -230,6 +230,12 @@ function addModule(module_data = false) {
 
       saveToStore('current_session', current_session);
     });
+
+    $('#module_cost_' + module_id).on('blur', function(e) {
+      $(this).val( add_commas($(this).val()));
+
+      saveToStore('current_session', current_session);
+    })
   });
 
   $('#module_quantity_' + hash).on('change', function (e) {
