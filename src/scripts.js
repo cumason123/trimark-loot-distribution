@@ -115,7 +115,7 @@ function addModule(module_data = false) {
             <label for="module_name_${hash}">Module name:</label><br />
             <select
             id="module_name_${hash}"
-            class="module">
+            class="module form-control">
               <option></option>
             </select>
             </p>
@@ -125,18 +125,18 @@ function addModule(module_data = false) {
             <input 
             id="module_quantity_${hash}"
             placeholder="quantity" 
-            class="numeric" 
+            class="numeric form-control" 
             type="number" 
             value="${current_session.modules[hash].quantity}" 
             />
             </p>
 
             <p>
-            <label for="module_cost_${hash}">Cost:</label><br />
+            <label for="module_cost_${hash}">Cost: <span id="module_cost_${hash}_info"></span></label><br />
             <input
             id="module_cost_${hash}"
             placeholder="cost" 
-            class="numeric" 
+            class="numeric form-control" 
             type="text" 
             value="${add_commas(current_session.modules[hash].cost)}" 
             />
@@ -153,7 +153,6 @@ function addModule(module_data = false) {
 
   $("#module_name_" + hash).select2({
     theme: 'bootstrap',
-    // width: '100%',
     data: echoes_items,
     placeholder: "e.g. Corpum C-Type Medium Laser",
     allowClear: true,
@@ -168,6 +167,8 @@ function addModule(module_data = false) {
     let this_id = $(this).attr('id').split('_');
     let module_id = this_id[this_id.length - 1];
 
+    $info = $('#module_cost_' + module_id + '_info');
+
     current_session.modules[module_id].item_id = parseInt(e.params.data.id);
     current_session.modules[module_id].name = e.params.data.text;
 
@@ -179,24 +180,56 @@ function addModule(module_data = false) {
     /** 
      * Commented out market API requests for the moment until it gets more reliable.
      */
-    // let item_id = e.params.data.id;
-    // let fetchMarketData = $.getJSON(api_base_uri + "/market-stats/" + item_id, function (data) {
+    let item_id = e.params.data.id;
+    $info.html('<img src="/loader.gif" width="16" height="16" />')
+    let fetchMarketData = $.getJSON(api_base_uri + "/market-stats/" + item_id, function (data) {
+      let d = new Date();
+      let n = new Date();
+      let hoursAgo = 1000000;
 
-    //   let cost = "sell" in data ? data[data.length - 1].sell : data[data.length - 1].highest_buy;
+      let cost = "sell" in data ? data[data.length - 1].sell : data[data.length - 1].highest_buy;
 
-    //   $("#module_cost_" + module_id).val(add_commas(cost));
-    //   current_session.modules[module_id].cost = cost;
+      $("#module_cost_" + module_id).val(add_commas(cost));
+      current_session.modules[module_id].cost = cost;
 
-    //   saveToStore('current_session', current_session);
-    // });
+      if (typeof data[data.length - 1].time != 'undefined') {
+        d.setTime(data[data.length - 1].time * 1000);
+        let timeDiff = n.getTime() - d.getTime();
+        hoursAgo = timeDiff / 3600000;
+      }
 
-    // fetchMarketData.fail(() => {
-    //   let cost = 0;
-    //   $("#module_cost_" + module_id).val(add_commas(cost));
-    //   current_session.modules[module_id].cost = cost;
+      if (hoursAgo >= 36) {
+        $info.html('❗️');
+        $info.data('toggle', 'tooltip');
+        $info.data('placement', 'top');
+        $info.data('html', true);
+        $info.attr('title', 'Note that the last sale for this item was more than ' + Math.floor(hoursAgo) + ' hours ago.');
+        $info.tooltip();
+      } else {
+        $info.html('');
+      }
 
-    //   saveToStore('current_session', current_session);
-    // });
+      saveToStore('current_session', current_session);
+    });
+
+    fetchMarketData.fail((e) => {
+      let cost = 0;
+      $("#module_cost_" + module_id).val(add_commas(cost));
+      current_session.modules[module_id].cost = cost;
+
+      if (e.status == 404) {
+        $info.html('❓');
+        $info.data('toggle', 'tooltip');
+        $info.data('placement', 'top');
+        $info.data('html', true);
+        $info.attr('title', 'No price found for this item. Please check the market manually.');
+        $info.tooltip();
+      } else {
+        $info.html('');
+      }
+
+      saveToStore('current_session', current_session);
+    });
   });
 
   $('#module_quantity_' + hash).on('change', function (e) {
@@ -257,7 +290,6 @@ function addMember(member_data = false) {
 
   $("#member_name_" + hash).select2({
     theme: 'bootstrap',
-    // width: '100%',
     data: user_list,
     placeholder: "e.g. DONTSHOOT",
     allowClear: true,
@@ -396,14 +428,10 @@ function displayList() {
    */
   let output = "";
 
-  output += 'Distribution' + "\n";
-
-  output += "\n";
-
   for (member in current_session.distribution) {
     output += '- **' + current_session.distribution[member].name + '** - _' + add_commas(current_session.distribution[member].loot_value) + ' ISK_' + "\n";
     for (hash in current_session.distribution[member].loot) {
-      output += '  - ' + current_session.distribution[member].loot[hash].name + ' x' + current_session.distribution[member].loot[hash].quantity + "\n";
+      output += '  - ' + current_session.distribution[member].loot[hash].quantity + 'x ' + current_session.distribution[member].loot[hash].name + ' @ ' + add_commas(current_session.distribution[member].loot[hash].cost) + ' ISK' + "\n";
     }
     output += "\n";
   }
