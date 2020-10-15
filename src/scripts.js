@@ -38,6 +38,15 @@ function download_loot() {
   });
 }
 
+function copy_to_clipboard() {
+  let $result = $('#result');
+  if ($result.val() == '') {
+    $('#calculate_button').click();
+  }
+  $result.select();
+  document.execCommand('copy');
+}
+
 function add_commas(x) {
   /**
    * Add commas to a given string
