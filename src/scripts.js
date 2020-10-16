@@ -196,7 +196,11 @@ function addModule(module_data = false) {
       let n = new Date();
       let hoursAgo = 1000000;
 
-      let cost = "sell" in data ? data[data.length - 1].sell : data[data.length - 1].highest_buy;
+      // let cost = "sell" in data ? data[data.length - 1].sell : data[data.length - 1].highest_buy;
+      let cost = 0;
+      if (typeof data[data.length - 1].sell != 'undefined') {
+        cost = data[data.length - 1].sell;
+      }
 
       $("#module_cost_" + module_id).val(add_commas(cost));
       current_session.modules[module_id].cost = cost;
@@ -214,8 +218,20 @@ function addModule(module_data = false) {
         $info.data('html', true);
         $info.attr('title', 'Note that the last sale for this item was more than ' + Math.floor(hoursAgo) + ' hours ago.');
         $info.tooltip();
+      } else if (cost == 0) {
+        $info.html('❓');
+        $info.data('toggle', 'tooltip');
+        $info.data('placement', 'top');
+        $info.data('html', true);
+        $info.attr('title', 'No price found for this item. Please check the market manually.');
+        $info.tooltip();
       } else {
-        $info.html('');
+        $info.html('ℹ️');
+        $info.data('toggle', 'tooltip');
+        $info.data('placement', 'top');
+        $info.data('html', true);
+        $info.attr('title', 'Last checked ' + hoursAgo.toPrecision(2) + ' hours ago.');
+        $info.tooltip();
       }
 
       saveToStore('current_session', current_session);
