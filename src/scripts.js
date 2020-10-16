@@ -196,7 +196,7 @@ function addModule(module_data = false) {
       let n = new Date();
       let hoursAgo = 1000000;
 
-      let cost = "sell" in data ? data[data.length - 1].sell : data[data.length - 1].highest_buy;
+      let cost = "sell" in data ? data[data.length - 1].sell : data[data.length - 1].lowest_sell;
 
       $("#module_cost_" + module_id).val(add_commas(cost));
       current_session.modules[module_id].cost = cost;
