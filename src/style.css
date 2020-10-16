@@ -21,7 +21,7 @@ body {
 @media (max-width: 1000px) {
   input, select, .select2 {
     width: 100% !important;
-  }  
+  }
 }
 
 @media (min-width: 1000px) {
@@ -35,5 +35,8 @@ body {
   input, select, .select2 {
     width: 23vw;
     margin-right: 30px;
-  }  
+  }
+  input.numeric {
+    width: 10vw;
+  }
 }
