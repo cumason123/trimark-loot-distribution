@@ -196,7 +196,7 @@ function addModule(module_data = false) {
       let n = new Date();
       let hoursAgo = 1000000;
 
-      let cost = '';
+      let cost = 0;
       if (typeof data[data.length - 1].sell != 'undefined') {
         cost = data[data.length - 1].sell;
       } else if (typeof data[data.length - 1].lowest_sell != 'undefined') {
@@ -256,12 +256,18 @@ function addModule(module_data = false) {
 
       saveToStore('current_session', current_session);
     });
+  });
 
-    $('#module_cost_' + module_id).on('blur', function(e) {
-      $(this).val( add_commas($(this).val()));
+  $('#module_cost_' + hash).on('blur', function(e) {
+    let current_value = $(this).val();
 
-      saveToStore('current_session', current_session);
-    })
+    if (current_value <= 0 || current_value == '') {
+      current_value = 0;
+    }
+
+    $(this).val( add_commas(current_value) );
+
+    saveToStore('current_session', current_session);
   });
 
   $('#module_quantity_' + hash).on('change', function (e) {
@@ -404,6 +410,10 @@ function calculate_distribution() {
 
   // Step 1: sort modules
   modules.sort((module1, module2) => {return (module1.cost > module2.cost ? -1 : 1)});
+
+  if (current_session.members.length <= 0 || current_session.modules.length <= 0) {
+    return false;
+  }
 
   for (member_id in current_session.members) {
     // Initialize member loot value to 0
