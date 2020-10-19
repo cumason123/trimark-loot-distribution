@@ -258,6 +258,10 @@ function addModule(module_data = false) {
     });
   });
 
+  if ($("#module_name_" + hash).val() == null || $("#module_name_" + hash).val() == '') {
+    $("#module_name_" + hash).select2('open');
+  }
+
   $('#module_cost_' + hash).on('blur', function(e) {
     let current_value = $(this).val();
 
@@ -360,6 +364,10 @@ function addMember(member_data = false) {
 
     saveToStore('current_session', current_session);
   });
+
+  if ($("#member_name_" + hash).val() == null || $("#member_name_" + hash).val() == '') {
+    $("#member_name_" + hash).select2('open');
+  }
 }
 
 function give_to(member, item_id, module_name, cost) {
