@@ -465,7 +465,8 @@ function displayList() {
   for (member in current_session.distribution) {
     output += '- **' + current_session.distribution[member].name + '** - _' + add_commas(current_session.distribution[member].loot_value) + ' ISK_' + "\n";
     for (hash in current_session.distribution[member].loot) {
-      output += '  - ' + current_session.distribution[member].loot[hash].quantity + 'x ' + current_session.distribution[member].loot[hash].name + ' @ ' + add_commas(current_session.distribution[member].loot[hash].cost) + ' ISK' + "\n";
+      let module_cost = readableNumber(current_session.distribution[member].loot[hash].cost);
+      output += '  - ' + current_session.distribution[member].loot[hash].quantity + 'x ' + current_session.distribution[member].loot[hash].name + ' @ ' + module_cost + ' ISK' + "\n";
     }
     output += "\n";
   }
@@ -593,4 +594,10 @@ function customSorter(results) {
   return results.sort((a, b) => {
     return a.text.toLowerCase().indexOf(q) - b.text.toLowerCase().indexOf(q);
   })
+}
+
+function readableNumber(cost) {
+  var suffix = ['', 'k', 'm', 'b', 't'];
+  var evaluated = Math.floor(Math.log(Math.abs(cost)) / Math.log(1000));
+  return cost / Math.pow(1000, evaluated).toFixed(2).toString() + "" + suffix[evaluated];
 }
