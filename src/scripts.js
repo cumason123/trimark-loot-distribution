@@ -166,8 +166,8 @@ function addModule(module_data = false) {
     placeholder: "e.g. Corpum C-Type Medium Laser",
     allowClear: true,
     tags: true,
-    minimumInputLength: 2,
-    matcher: customMatcher
+    matcher: moduleMatcher,
+    sorter: customSorter
   });
   $("#module_name_" + hash).val(current_session.modules[hash].item_id);
   $("#module_name_" + hash).trigger('change');
@@ -196,7 +196,12 @@ function addModule(module_data = false) {
       let n = new Date();
       let hoursAgo = 1000000;
 
-      let cost = "sell" in data ? data[data.length - 1].sell : data[data.length - 1].lowest_sell;
+      let cost = 0;
+      if (typeof data[data.length - 1].sell != 'undefined') {
+        cost = data[data.length - 1].sell;
+      } else if (typeof data[data.length - 1].lowest_sell != 'undefined') {
+        cost = data[data.length - 1].lowest_sell;
+      }
 
       $("#module_cost_" + module_id).val(add_commas(cost));
       current_session.modules[module_id].cost = cost;
@@ -214,8 +219,20 @@ function addModule(module_data = false) {
         $info.data('html', true);
         $info.attr('title', 'Note that the last sale for this item was more than ' + Math.floor(hoursAgo) + ' hours ago.');
         $info.tooltip();
+      } else if (cost == 0) {
+        $info.html('❓');
+        $info.data('toggle', 'tooltip');
+        $info.data('placement', 'top');
+        $info.data('html', true);
+        $info.attr('title', 'No price found for this item. Please check the market manually.');
+        $info.tooltip();
       } else {
-        $info.html('');
+        $info.html('ℹ️');
+        $info.data('toggle', 'tooltip');
+        $info.data('placement', 'top');
+        $info.data('html', true);
+        $info.attr('title', 'Last checked ' + hoursAgo.toPrecision(2) + ' hours ago.');
+        $info.tooltip();
       }
 
       saveToStore('current_session', current_session);
@@ -239,12 +256,22 @@ function addModule(module_data = false) {
 
       saveToStore('current_session', current_session);
     });
+  });
 
-    $('#module_cost_' + module_id).on('blur', function(e) {
-      $(this).val( add_commas($(this).val()));
+  if ($("#module_name_" + hash).val() == null || $("#module_name_" + hash).val() == '') {
+    $("#module_name_" + hash).select2('open');
+  }
 
-      saveToStore('current_session', current_session);
-    })
+  $('#module_cost_' + hash).on('blur', function(e) {
+    let current_value = $(this).val();
+
+    if (current_value <= 0 || current_value == '') {
+      current_value = 0;
+    }
+
+    $(this).val( add_commas(current_value) );
+
+    saveToStore('current_session', current_session);
   });
 
   $('#module_quantity_' + hash).on('change', function (e) {
@@ -308,7 +335,9 @@ function addMember(member_data = false) {
     data: user_list,
     placeholder: "e.g. DONTSHOOT",
     allowClear: true,
-    tags: true
+    tags: true,
+    matcher: memberMatcher,
+    sorter: customSorter
   });
   $("#member_name_" + hash).val(current_session.members[hash].name);
   $("#member_name_" + hash).trigger('change');
@@ -335,6 +364,10 @@ function addMember(member_data = false) {
 
     saveToStore('current_session', current_session);
   });
+
+  if ($("#member_name_" + hash).val() == null || $("#member_name_" + hash).val() == '') {
+    $("#member_name_" + hash).select2('open');
+  }
 }
 
 function give_to(member, item_id, module_name, cost) {
@@ -385,6 +418,10 @@ function calculate_distribution() {
 
   // Step 1: sort modules
   modules.sort((module1, module2) => {return (module1.cost > module2.cost ? -1 : 1)});
+
+  if (current_session.members.length <= 0 || current_session.modules.length <= 0) {
+    return false;
+  }
 
   for (member_id in current_session.members) {
     // Initialize member loot value to 0
@@ -446,7 +483,8 @@ function displayList() {
   for (member in current_session.distribution) {
     output += '- **' + current_session.distribution[member].name + '** - _' + add_commas(current_session.distribution[member].loot_value) + ' ISK_' + "\n";
     for (hash in current_session.distribution[member].loot) {
-      output += '  - ' + current_session.distribution[member].loot[hash].quantity + 'x ' + current_session.distribution[member].loot[hash].name + ' @ ' + add_commas(current_session.distribution[member].loot[hash].cost) + ' ISK' + "\n";
+      let module_cost = readableNumber(current_session.distribution[member].loot[hash].cost);
+      output += '  - ' + current_session.distribution[member].loot[hash].quantity + 'x ' + current_session.distribution[member].loot[hash].name + ' @ ' + module_cost + ' ISK' + "\n";
     }
     output += "\n";
   }
@@ -505,13 +543,19 @@ function clearSession() {
   }
 }
 
-function customMatcher(params, data) {
+function moduleMatcher(params, data) {
   if ($.trim(params.term) === '') {
     return data;
   }
 
   if (typeof data.text === 'undefined') {
     return null;
+  }
+
+  for (current_module in current_session.modules) {
+    if (current_session.modules[current_module].name == data.text) {
+      return null;
+    }
   }
 
   let words = params.term.split(' ');
@@ -529,4 +573,49 @@ function customMatcher(params, data) {
   } else {
     return data;
   }
+}
+
+function memberMatcher(params, data) {
+  if ($.trim(params.term) === '') {
+    return data;
+  }
+
+  if (typeof data.text === 'undefined') {
+    return null;
+  }
+
+  for (current_member in current_session.members) {
+    if (current_session.members[current_member].name == data.text) {
+      return null;
+    }
+  }
+
+  let words = params.term.split(' ');
+  let match = true;
+  for (word in words) {
+    let term_word_upper = words[word].toUpperCase();
+    let text_upper = data.text.toUpperCase();
+    if (text_upper.indexOf(term_word_upper) == -1) {
+        match = false;
+    }
+  }
+
+  if (!match) {
+    return null;
+  } else {
+    return data;
+  }
+}
+
+function customSorter(results) {
+  let q = $('.select2-search__field').val().toLowerCase();
+  return results.sort((a, b) => {
+    return a.text.toLowerCase().indexOf(q) - b.text.toLowerCase().indexOf(q);
+  })
+}
+
+function readableNumber(cost) {
+  var suffix = ['', 'k', 'm', 'b', 't'];
+  var evaluated = Math.floor(Math.log(Math.abs(cost)) / Math.log(1000));
+  return cost / Math.pow(1000, evaluated).toFixed(2).toString() + "" + suffix[evaluated];
 }
