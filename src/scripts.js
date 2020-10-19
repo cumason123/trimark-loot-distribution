@@ -166,8 +166,8 @@ function addModule(module_data = false) {
     placeholder: "e.g. Corpum C-Type Medium Laser",
     allowClear: true,
     tags: true,
-    minimumInputLength: 2,
-    matcher: customMatcher
+    matcher: moduleMatcher,
+    sorter: customSorter
   });
   $("#module_name_" + hash).val(current_session.modules[hash].item_id);
   $("#module_name_" + hash).trigger('change');
@@ -324,7 +324,9 @@ function addMember(member_data = false) {
     data: user_list,
     placeholder: "e.g. DONTSHOOT",
     allowClear: true,
-    tags: true
+    tags: true,
+    matcher: memberMatcher,
+    sorter: customSorter
   });
   $("#member_name_" + hash).val(current_session.members[hash].name);
   $("#member_name_" + hash).trigger('change');
@@ -521,13 +523,19 @@ function clearSession() {
   }
 }
 
-function customMatcher(params, data) {
+function moduleMatcher(params, data) {
   if ($.trim(params.term) === '') {
     return data;
   }
 
   if (typeof data.text === 'undefined') {
     return null;
+  }
+
+  for (current_module in current_session.modules) {
+    if (current_session.modules[current_module].name == data.text) {
+      return null;
+    }
   }
 
   let words = params.term.split(' ');
@@ -545,4 +553,43 @@ function customMatcher(params, data) {
   } else {
     return data;
   }
+}
+
+function memberMatcher(params, data) {
+  if ($.trim(params.term) === '') {
+    return data;
+  }
+
+  if (typeof data.text === 'undefined') {
+    return null;
+  }
+
+  for (current_member in current_session.members) {
+    if (current_session.members[current_member].name == data.text) {
+      return null;
+    }
+  }
+
+  let words = params.term.split(' ');
+  let match = true;
+  for (word in words) {
+    let term_word_upper = words[word].toUpperCase();
+    let text_upper = data.text.toUpperCase();
+    if (text_upper.indexOf(term_word_upper) == -1) {
+        match = false;
+    }
+  }
+
+  if (!match) {
+    return null;
+  } else {
+    return data;
+  }
+}
+
+function customSorter(results) {
+  let q = $('.select2-search__field').val().toLowerCase();
+  return results.sort((a, b) => {
+    return a.text.toLowerCase().indexOf(q) - b.text.toLowerCase().indexOf(q);
+  })
 }
