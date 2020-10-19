@@ -196,10 +196,11 @@ function addModule(module_data = false) {
       let n = new Date();
       let hoursAgo = 1000000;
 
-      // let cost = "sell" in data ? data[data.length - 1].sell : data[data.length - 1].highest_buy;
-      let cost = 0;
+      let cost = '';
       if (typeof data[data.length - 1].sell != 'undefined') {
         cost = data[data.length - 1].sell;
+      } else if (typeof data[data.length - 1].lowest_sell != 'undefined') {
+        cost = data[data.length - 1].lowest_sell;
       }
 
       $("#module_cost_" + module_id).val(add_commas(cost));
